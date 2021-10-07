@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from copy import deepcopy
 
-from pymdp import maths, utils
+from pymdp import utils
 from pymdp import control
 from pymdp.maths import spm_log_single as log_stable # Numerically stable version of np.log() based on the function from MATLAB's SPM library, spm_log.m
 
-from fep_functions import KL_divergence, free_energy, softmax, perform_inference
+from fep_functions import KL_divergence, softmax
 
 # Generative model
     
@@ -297,7 +297,7 @@ P = P(xdim, ydim,actions,state_mapping)
 B = transition_matrix(num_states, num_actions, P)
 
 # Desired state vector, C. The goal vector.
-REWARD_LOCATION = 9
+REWARD_LOCATION = 15
 reward_state = state_mapping[REWARD_LOCATION]
 
 C = np.zeros(num_states)
@@ -306,13 +306,13 @@ plot_beliefs(C, "Desired location")
 
 
 # Initialize grid world.
-start_state = 11
+start_state = 1
 env = GridWorld(A,B, start_state, xdim*ydim)
 
 # Prior beliefs. The agent is uncertain of which state it is in. q(x_0 | o_0)
 Qs = np.ones(num_states)*1/num_states
 
-#active_inference(env,A,B,C,Qs, start_state)
+active_inference(env,A,B,C,Qs, start_state)
 
 # Reset environment.
 env.reset(xdim*ydim)
