@@ -4,11 +4,10 @@ import copy
 
 env = gym.make('FrozenLake-v1', is_slippery=True)
 
-
 DISCOUNT = 0.99
 EPSILON = 0.00001
 
-def policy(env, V, pi, s):
+def find_policy(env, V, pi, s):
     e = np.zeros(env.env.nA)
     for a in range(env.env.nA):
         P = np.array(env.env.P[s][a])
@@ -59,16 +58,18 @@ def value_iteration(env):
         for s in range(env.env.nS):
             V[s] = sum_utility(env, v, s)
         delta = max(delta, np.max(np.abs(v-V)))
+        
+        
     return V
 
 
 V = value_iteration(env)
 print("Values: ", V)
 
-# Print policy
+# Find policy.
 pi = np.zeros((env.env.nS, env.env.nA))
 for s in range(env.env.nS):
-    pi = policy(env, V, pi, s)
+    pi = find_policy(env, V, pi, s)
     
 pol = np.zeros(env.env.nS)
 
@@ -77,20 +78,23 @@ for i in range(len(pi)):
         if (pi[i][k] == 1):
             pol[i] = k
 
-actions = np.reshape(pol, (4,4))
-print(actions)
+# Print policy.
+policy = np.reshape(pol, (4,4))
+print(policy)
+
+def test_policy(env, policy):
+    e = 0
+    for i in range(100):
+        state = env.reset()
+        for t in range(500):
+            state, reward, done, _ = env.step(policy[state])
+            if done:
+                if reward == 1:
+                    e += 1
+                break
+            
+            
+    print("The agent succeeded to reach goal {} out of 100 episodes using this policy".format(e))
 
 
-e = 0
-for i in range(100):
-    u = env.reset()
-    for t in range(10000):
-        u, reward, done, info = env.step(pol[u])
-        if done:
-            if reward == 1:
-                e += 1
-            break
-        
-print("The agent succeeded to reach goal {} out of 100 episodes using this policy".format(e))
-
-
+test_policy(env, pol)

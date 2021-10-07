@@ -11,7 +11,7 @@ def qlearning(env):
     n_episodes = 10000
     max_iterations = 100
     
-    explore = 1
+    exploration = 1
     min_explore = 0.01
     
     Q_table = np.zeros((env.env.nS, env.env.nA))
@@ -23,7 +23,7 @@ def qlearning(env):
         
         for i in range(max_iterations):
             
-            if np.random.uniform(0,1) < explore:
+            if np.random.uniform(0,1) < exploration:
                 action = env.action_space.sample()
             else:
                 action = np.argmax(Q_table[state, :])
@@ -38,29 +38,36 @@ def qlearning(env):
                 break
             state = next_state
         
-        explore = max(min_explore, np.exp(-0.001*e))
+        exploration = max(min_explore, np.exp(-0.001*e))
             
     return Q_table
 
-#print(env.render())
+
 Q_table = qlearning(env)
-print(Q_table.round(2))
+#print(Q_table.round(2))
+
 
 pol = np.zeros(env.env.nS)
 for i in range(len(Q_table)):
     pol[i] = np.argmax(Q_table[i])
     
-actions = np.reshape(pol, (4,4))
-print(actions)
+policy = np.reshape(pol, (4,4))
+print(policy)
 
-e = 0
-for i in range(100):
-    u = env.reset()
-    for t in range(500):
-        u, reward, done, info = env.step(pol[u])
-        if done:
-            if reward == 1:
-                e += 1
-            break
-        
-print("The agent succeeded to reach goal {} out of 100 episodes using this policy".format(e))
+
+def test_policy(env, policy):
+    e = 0
+    for i in range(100):
+        state = env.reset()
+        for t in range(500):
+            state, reward, done, _ = env.step(policy[state])
+            if done:
+                if reward == 1:
+                    e += 1
+                break
+            
+            
+    print("The agent succeeded to reach goal {} out of 100 episodes using this policy".format(e))
+
+
+test_policy(env, pol)
